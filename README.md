@@ -1,0 +1,1 @@
+### The project structure was generated with [create-project-struct](https://github.com/blackmarllbor0/create-project-struct).
