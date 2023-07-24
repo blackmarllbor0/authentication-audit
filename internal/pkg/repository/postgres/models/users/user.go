@@ -2,18 +2,14 @@ package users
 
 import (
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 type (
 	Users struct {
 		gorm.Model
-		ID                  uint   `gorm:"primaryKey"`
-		Login               string `gorm:"unique"`
-		Password            string
-		FailedLoginAttempts int
-		CreatedAt           time.Time
-		UpdatedAt           time.Time
+		Login               string `gorm:"unique,not null" json:"login,omitempty"`
+		Password            string `gorm:"not null" json:"password,omitempty"`
+		FailedLoginAttempts int    `json:"failedLoginAttempts,omitempty"`
 	}
 	User struct {
 		db *gorm.DB
@@ -29,9 +25,8 @@ func NewUser(db *gorm.DB) *User {
 
 func (r User) CreateUser(login, hashPwd string) (Users, error) {
 	user := Users{
-		Login:     login,
-		Password:  hashPwd,
-		CreatedAt: time.Now(),
+		Login:    login,
+		Password: hashPwd,
 	}
 
 	if err := r.db.Create(&user).Error; err != nil {

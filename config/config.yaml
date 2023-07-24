@@ -1,0 +1,5 @@
+app:
+  server:
+    port: 8080
+  db:
+    dsn: "host=127.0.0.1 user=bm password=1234 dbname=auth_audit port=5432 sslmode=disable"

@@ -1,6 +1,4 @@
-include .env
-
-PROJECT_NAME = apteka_aprel
+PROJECT_NAME = main
 PROJECT_PATH = cmd/$(PROJECT_NAME).go
 
 .PHONY:run
@@ -22,6 +20,3 @@ lint:
 .PHONY: up_db
 up_db:
 	docker compose up -d
-
-psql:
-	docker exec -it postgres_db psql $(POSTGRES_DB) $(POSTGRES_USER)

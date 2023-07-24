@@ -7,7 +7,6 @@ import (
 
 type AuthenticationAudit struct {
 	gorm.Model
-	ID        uint `gorm:"primaryKey"`
-	EventTime time.Time
-	EventType string
+	EventTime time.Time `gorm:"not null" json:"eventTime"`
+	EventType string    `gorm:"not null" json:"eventType,omitempty"`
 }

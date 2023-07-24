@@ -1,7 +1,7 @@
 package users
 
 import (
-	"aptekaaprel/internal/pkg/repository/postgres/models/users"
+	"auth_audit/internal/pkg/repository/postgres/models/users"
 	"crypto/sha256"
 	"fmt"
 )

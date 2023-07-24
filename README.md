@@ -1,15 +1,12 @@
 # Benefit for launching the application.
 
-## 1. At the root of the project, create and ```.env``` file and place th following variables there:
+## 1. In the config package, create a ```config.yaml``` file and put the following content in it:
 ```
-POSTGRES_PASSWORD=DEFAULT_VALUE # string
-POSTGRES_USER=DEFAULT_VALUE # string
-POSTGRES_DB=DEFAULT_VALUE # string
-POSTGRES_PORT=DEFAULT_VALUE # number
-POSTGRES_HOST=DEFAULT_VALUE # string
-POSTGRES_SSL_MODE=DEFAULT_VALUE # bool
-
-SERVER_PORT=DEFAULT_VALUE # number
+app:
+  server:
+    port: int
+  db:
+    dsn: string
 ```
 
 ## 2. You must have Docker & Docker-compose on your local machine.

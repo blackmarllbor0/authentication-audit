@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"aptekaaprel/internal/app/server/handlers/users"
+	"auth_audit/internal/app/server/handlers/users"
 	"github.com/gin-gonic/gin"
 )
 

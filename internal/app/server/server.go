@@ -1,8 +1,8 @@
 package server
 
 import (
-	"aptekaaprel/config/configGetter"
-	"aptekaaprel/internal/pkg/signal"
+	"auth_audit/config/configValueGetter"
+	"auth_audit/internal/pkg/signal"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,18 +11,18 @@ import (
 type Server struct {
 	server *http.Server
 
-	configGetter configGetter.ConfigGetter
+	configValueGetter configValueGetter.ConfigValueGetter
 }
 
-func NewServer(configGetter configGetter.ConfigGetter) *Server {
+func NewServer(configValueGetter configValueGetter.ConfigValueGetter) *Server {
 	return &Server{
-		configGetter: configGetter,
+		configValueGetter: configValueGetter,
 	}
 }
 
 func (s *Server) Run(handlers http.Handler) error {
 	s.server = &http.Server{
-		Addr:           fmt.Sprintf(":%v", s.configGetter.GetValueByKey("SERVER_PORT")),
+		Addr:           fmt.Sprintf(":%v", s.configValueGetter.GetValueByKeys("app.server.port")),
 		Handler:        handlers,
 		MaxHeaderBytes: 1 << 20,
 		ReadTimeout:    time.Second * 10,

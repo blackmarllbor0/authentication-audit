@@ -1,8 +1,8 @@
 package users
 
 import (
-	"aptekaaprel/internal/app/server/services/users"
-	userModel "aptekaaprel/internal/pkg/repository/postgres/models/users"
+	"auth_audit/internal/app/server/services/users"
+	userModel "auth_audit/internal/pkg/repository/postgres/models/users"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

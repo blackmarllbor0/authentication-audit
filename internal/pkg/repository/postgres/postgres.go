@@ -1,35 +1,25 @@
 package postgres
 
 import (
-	models2 "aptekaaprel/internal/pkg/repository/postgres/models/audits"
-	"aptekaaprel/internal/pkg/repository/postgres/models/sessions"
-	"aptekaaprel/internal/pkg/repository/postgres/models/users"
-	"fmt"
-
-	"aptekaaprel/config/configGetter"
+	"auth_audit/config/configValueGetter"
+	"auth_audit/internal/pkg/repository/postgres/models/audits"
+	"auth_audit/internal/pkg/repository/postgres/models/sessions"
+	"auth_audit/internal/pkg/repository/postgres/models/users"
 	"github.com/jinzhu/gorm"
 )
 
 type Repository struct {
 	db *gorm.DB
 
-	configGetter configGetter.ConfigGetter
+	configValueGetter configValueGetter.ConfigValueGetter
 }
 
-func NewRepository(configGetter configGetter.ConfigGetter) *Repository {
-	return &Repository{configGetter: configGetter}
+func NewRepository(configValueGetter configValueGetter.ConfigValueGetter) *Repository {
+	return &Repository{configValueGetter: configValueGetter}
 }
 
 func (r *Repository) Connect() (*gorm.DB, error) {
-	DB, err := gorm.Open("postgres", fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		r.configGetter.GetValueByKey("POSTGRES_HOST"),
-		r.configGetter.GetValueByKey("POSTGRES_PORT"),
-		r.configGetter.GetValueByKey("POSTGRES_USER"),
-		r.configGetter.GetValueByKey("POSTGRES_PASSWORD"),
-		r.configGetter.GetValueByKey("POSTGRES_DB"),
-		r.configGetter.GetValueByKey("POSTGRES_SSL_MODE"),
-	))
+	DB, err := gorm.Open("postgres", r.configValueGetter.GetValueByKeys("app.db.dsn"))
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +28,7 @@ func (r *Repository) Connect() (*gorm.DB, error) {
 
 	r.autoMigrate()
 
-	return DB, nil
+	return r.db, nil
 }
 
 func (r *Repository) Disconnect() error {
@@ -49,6 +39,6 @@ func (r *Repository) autoMigrate() {
 	r.db.AutoMigrate(
 		&users.Users{},
 		&sessions.Session{},
-		&models2.AuthenticationAudit{},
+		&audits.AuthenticationAudit{},
 	)
 }
