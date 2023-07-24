@@ -7,9 +7,9 @@ import (
 type (
 	Users struct {
 		gorm.Model
-		Login               string `gorm:"unique,not null" json:"login,omitempty"`
-		Password            string `gorm:"not null" json:"password,omitempty"`
-		FailedLoginAttempts int    `json:"failedLoginAttempts,omitempty"`
+		Login               string // `gorm:"unique,not null" json:"login,omitempty"`
+		Password            string // `gorm:"not null" json:"password,omitempty"`
+		FailedLoginAttempts int    // `json:"failedLoginAttempts,omitempty"`
 	}
 	User struct {
 		db *gorm.DB

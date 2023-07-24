@@ -26,7 +26,9 @@ func (r *Repository) Connect() (*gorm.DB, error) {
 
 	r.db = DB
 
-	r.autoMigrate()
+	if err := r.autoMigrate(); err != nil {
+		return nil, err
+	}
 
 	return r.db, nil
 }
@@ -35,10 +37,14 @@ func (r *Repository) Disconnect() error {
 	return r.db.Close()
 }
 
-func (r *Repository) autoMigrate() {
-	r.db.AutoMigrate(
+func (r *Repository) autoMigrate() error {
+	if err := r.db.AutoMigrate(
 		&users.Users{},
 		&sessions.Session{},
 		&audits.AuthenticationAudit{},
-	)
+	).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
