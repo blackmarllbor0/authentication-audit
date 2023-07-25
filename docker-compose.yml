@@ -3,7 +3,7 @@ version: "3.9"
 services:
   postgresql:
     image: "postgres"
-    container_name: "auth_audit"
+    container_name: ${DOCKER_CONTAINER_NAME}
     restart: always
     env_file:
       - .env

@@ -1,6 +1,7 @@
 package users
 
 import (
+	"auth_audit/internal/pkg/repository/postgres/models"
 	"auth_audit/internal/pkg/repository/postgres/models/users"
 	"crypto/sha256"
 	"fmt"
@@ -11,7 +12,7 @@ type (
 		userRepo users.Repository
 	}
 	Service interface {
-		CreateUser(login, pwd string) (users.Users, error)
+		CreateUser(login, pwd string) (models.User, error)
 	}
 )
 
@@ -19,9 +20,9 @@ func NewService(repo users.Repository) *Users {
 	return &Users{userRepo: repo}
 }
 
-func (s Users) CreateUser(login, pwd string) (users.Users, error) {
+func (s Users) CreateUser(login, pwd string) (models.User, error) {
 	if len(pwd) < 8 {
-		return users.Users{}, fmt.Errorf("the number of characters must be less than 8")
+		return models.User{}, fmt.Errorf("the number of characters must be less than 8")
 	}
 
 	return s.userRepo.CreateUser(login, s.hashPwd(pwd))
@@ -32,7 +33,7 @@ func (s Users) hashPwd(pwd string) string {
 	hasher.Write([]byte(pwd))
 	hashPwd := hasher.Sum(nil)
 
-	// Преоброзование хеша в строку 16-ричного формата.
+	// Convert hash to hex string.
 	hashPwdStr := fmt.Sprintf("%x", hashPwd)
 	return hashPwdStr
 }

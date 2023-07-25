@@ -2,9 +2,7 @@ package postgres
 
 import (
 	"auth_audit/config/configValueGetter"
-	"auth_audit/internal/pkg/repository/postgres/models/audits"
-	"auth_audit/internal/pkg/repository/postgres/models/sessions"
-	"auth_audit/internal/pkg/repository/postgres/models/users"
+	"auth_audit/internal/pkg/repository/postgres/models"
 	"github.com/jinzhu/gorm"
 )
 
@@ -39,9 +37,9 @@ func (r *Repository) Disconnect() error {
 
 func (r *Repository) autoMigrate() error {
 	if err := r.db.AutoMigrate(
-		&users.Users{},
-		&sessions.Session{},
-		&audits.AuthenticationAudit{},
+		&models.User{},
+		&models.Session{},
+		&models.AuthenticationAudit{},
 	).Error; err != nil {
 		return err
 	}

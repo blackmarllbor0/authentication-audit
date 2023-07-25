@@ -1,3 +1,5 @@
+include .env
+
 PROJECT_NAME = main
 PROJECT_PATH = cmd/$(PROJECT_NAME).go
 
@@ -20,3 +22,7 @@ lint:
 .PHONY: up_db
 up_db:
 	docker compose up -d
+
+.PHONY:restore_db
+restore_db:
+	docker stop $(DOCKER_CONTAINER_NAME) && docker rm $(DOCKER_CONTAINER_NAME) && make up_db

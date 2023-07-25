@@ -2,7 +2,7 @@ package users
 
 import (
 	"auth_audit/internal/app/server/services/users"
-	userModel "auth_audit/internal/pkg/repository/postgres/models/users"
+	"auth_audit/internal/pkg/repository/postgres/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -21,7 +21,7 @@ func NewUsers(userService users.Service) *Users {
 }
 
 func (u Users) CreateUser(ctx *gin.Context) {
-	var user userModel.Users
+	var user models.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
