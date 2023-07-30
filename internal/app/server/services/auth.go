@@ -38,7 +38,7 @@ func (s AuthService) Auth(login, pwd string) (*models.Session, error) {
 		return nil, fmt.Errorf("an error occurred during data validation. Make sure. that all information is correct")
 	}
 
-	session, err := s.sessionService.CreateSession(user)
+	session, err := s.sessionService.CreateSession()
 	if err != nil {
 		return nil, err
 	}

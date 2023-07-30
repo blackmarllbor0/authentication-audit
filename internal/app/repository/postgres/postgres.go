@@ -22,9 +22,9 @@ func (r *Repository) Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	//if err := DB.DB().Ping(); err != nil {
-	//	return nil, err
-	//}
+	if err := DB.DB().Ping(); err != nil {
+		return nil, err
+	}
 
 	r.db = DB
 
