@@ -2,7 +2,7 @@ package server
 
 import (
 	"auth_audit/config/configValueGetter"
-	"auth_audit/internal/pkg/signal"
+	"auth_audit/pkg/signal"
 	"fmt"
 	"net/http"
 	"time"
