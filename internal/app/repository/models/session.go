@@ -8,6 +8,7 @@ import (
 type Session struct {
 	gorm.Model
 
-	Token     string
-	ExpiresAt time.Time
+	UserID uint      `gorm:"TYPE:integer REFERENCES users;not null"`
+	Token  string    `gorm:"type:varchar(100);uniqueIndex;not null"`
+	Expiry time.Time `gorm:"not null"`
 }

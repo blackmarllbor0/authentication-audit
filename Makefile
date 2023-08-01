@@ -26,3 +26,7 @@ up_db:
 .PHONY:restore_db
 restore_db:
 	docker stop $(DOCKER_CONTAINER_NAME) && docker rm $(DOCKER_CONTAINER_NAME) && make up_db
+
+.PHONY:psql
+psql:
+	docker exec -it $(DOCKER_CONTAINER_NAME) psql $(POSTGRES_DB) $(POSTGRES_USER)

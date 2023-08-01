@@ -7,8 +7,7 @@ import (
 
 type AuthenticationAudit struct {
 	gorm.Model
-
-	UserID uint
-	Time   time.Time
-	Event  string //  "Successful Login", "Invalid Password", "Account Blocked"
+	UserID uint      `gorm:"TYPE:integer REFERENCES users;not null"`
+	Time   time.Time `gorm:"not null"`
+	Event  string    `gorm:"type:varchar(100);not null"`
 }
