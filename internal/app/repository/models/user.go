@@ -1,17 +1,11 @@
 package models
 
-import (
-	"github.com/jinzhu/gorm"
-	"time"
-)
+import "github.com/jinzhu/gorm"
 
 type User struct {
 	gorm.Model
-	Login              string `gorm:"type:varchar(100);uniqueIndex;not null"`
-	PasswordHash       string `gorm:"type:varchar(100);not null"`
-	LoginAttempts      int    `gorm:"default:0"`
-	Blocked            bool   `gorm:"default:false"`
-	LastLoginAttempt   time.Time
-	SessionToken       string `gorm:"type:varchar(100)"`
-	SessionTokenExpiry time.Time
+	Login               string `gorm:"uniqueIndex;not null"`
+	PasswordHash        string `gorm:"not null"`
+	FailedLoginAttempts int    `gorm:"default:0"`
+	Blocked             bool   `gorm:"default:false"`
 }

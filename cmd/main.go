@@ -3,6 +3,9 @@ package main
 import (
 	"auth_audit/config"
 	"auth_audit/internal/app/repository/postgres"
+	"auth_audit/internal/app/server"
+	"auth_audit/internal/app/server/handlers"
+	"auth_audit/internal/app/server/services"
 	"github.com/spf13/viper"
 	"log"
 
@@ -17,7 +20,7 @@ func main() {
 
 	repository := postgres.NewRepository(configService)
 
-	_, err := repository.Connect()
+	DB, err := repository.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,4 +30,18 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
+	userRepo := postgres.NewUserRepository(DB)
+	sessionRepo := postgres.NewSessionRepository(DB)
+
+	userService := services.NewUserService(userRepo)
+	sessionService := services.NewSessionService(sessionRepo)
+	authService := services.NewAuthService(userService, sessionService)
+
+	handler := handlers.NewHandler(authService)
+
+	srv := server.NewServer(configService)
+	if err := srv.Run(handler.Router()); err != nil {
+		log.Fatal(err)
+	}
 }

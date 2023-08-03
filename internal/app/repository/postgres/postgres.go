@@ -41,9 +41,9 @@ func (r *Repository) Disconnect() error {
 
 func (r *Repository) autoMigrate() error {
 	if err := r.db.AutoMigrate(
+		&models.User{},
 		&models.Session{},
 		&models.AuthenticationAudit{},
-		&models.User{},
 	).Error; err != nil {
 		return err
 	}

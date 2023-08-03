@@ -1,63 +1,47 @@
 package services
 
 import (
-	repositories "auth_audit/internal/app/repository/interfaces"
+	"auth_audit/internal/app/repository/interfaces"
 	"auth_audit/internal/app/repository/models"
 	"crypto/rand"
-	"crypto/sha1"
-	"fmt"
-	"strconv"
+	"encoding/base64"
 	"time"
 )
 
-const (
-	sessionDuration = time.Hour * 1
-)
-
 type SessionService struct {
-	sessionRepo repositories.SessionRepository
+	sessionRepository interfaces.SessionRepository
 }
 
-func NewSessionService(sessionRepository repositories.SessionRepository) *SessionService {
-	return &SessionService{sessionRepo: sessionRepository}
+func NewSessionService(sessionRepository interfaces.SessionRepository) *SessionService {
+	return &SessionService{sessionRepository: sessionRepository}
 }
 
-func (s SessionService) CreateSession() (*models.Session, error) {
-	token, err := s.generateSessionToken()
-	if err != nil {
-		return nil, err
+func (s SessionService) Create(userID uint) (*models.Session, error) {
+	token := s.generateToken()
+	for len(token) == 0 {
+		token = s.generateToken()
 	}
 
 	session := &models.Session{
-		Token:     token,
-		ExpiresAt: time.Now().Add(sessionDuration),
+		Token:    token,
+		LiveTime: time.Now().Add(time.Hour * 1),
+		UserID:   userID,
 	}
 
-	sessionID, err := s.sessionRepo.Create(session)
-
-	session.ID = sessionID
+	if err := s.sessionRepository.Create(session); err != nil {
+		return nil, err
+	}
 
 	return session, nil
 }
 
-func (s SessionService) generateSessionToken() (string, error) {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
+func (s SessionService) generateToken() string {
+	buffer := make([]byte, 32)
+	_, err := rand.Read(buffer)
 	if err != nil {
-		return "", err
+		return ""
 	}
 
-	salt := fmt.Sprintf("%x", b)
+	return base64.URLEncoding.EncodeToString(buffer)
 
-	timestamp := time.Now().Unix()
-
-	data := salt + strconv.FormatInt(timestamp, 10)
-
-	hasher := sha1.New()
-	hasher.Write([]byte(data))
-	sha1Hash := hasher.Sum(nil)
-
-	token := fmt.Sprintf("%x", sha1Hash)
-
-	return token, nil
 }
