@@ -30,7 +30,7 @@ func (s AuthService) Register(dto DTO.RegisterUserDTO) (*models.Session, error) 
 		return nil, fmt.Errorf("user with this login already exists")
 	}
 
-	user, err := s.userService.CreateUser(dto.Login, dto.Password)
+	user, err := s.userService.CreateUser(dto)
 	if err != nil {
 		return nil, err
 	}

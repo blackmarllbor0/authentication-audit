@@ -27,8 +27,12 @@ func (r UserRepository) GetByLogin(login string) (*models.User, error) {
 }
 
 func (r UserRepository) GetById(ID uint) (*models.User, error) {
-	//TODO implement me
-	panic("implement me")
+	var user models.User
+	if err := r.db.Where("id = ?", ID).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (r UserRepository) Block() {

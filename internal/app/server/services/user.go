@@ -3,7 +3,8 @@ package services
 import (
 	"auth_audit/internal/app/repository/interfaces"
 	"auth_audit/internal/app/repository/models"
-	"fmt"
+	"auth_audit/internal/app/server/DTO"
+	"auth_audit/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,18 +16,18 @@ func NewUserService(userRepository interfaces.UserRepository) *UserService {
 	return &UserService{userRepository: userRepository}
 }
 
-func (s UserService) CreateUser(login, pwd string) (*models.User, error) {
-	if len(pwd) < 8 {
-		return nil, fmt.Errorf("password must contain at least 8 characters")
+func (s UserService) CreateUser(createUserDTO DTO.RegisterUserDTO) (*models.User, error) {
+	if len(createUserDTO.Password) < 8 {
+		return nil, errors.ShortPassword
 	}
 
-	pwdHash, err := s.hashPwd(pwd)
+	pwdHash, err := s.hashPwd(createUserDTO.Password)
 	if err != nil {
 		return nil, err
 	}
 
 	user := &models.User{
-		Login:        login,
+		Login:        createUserDTO.Login,
 		PasswordHash: pwdHash,
 	}
 
@@ -42,6 +43,10 @@ func (s UserService) GetUserByLogin(login string) (*models.User, error) {
 }
 
 func (s UserService) hashPwd(pwd string) (string, error) {
+	if len(pwd) < 8 {
+		return "", errors.ShortPassword
+	}
+
 	bytes, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
