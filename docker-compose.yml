@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  postgresql:
+  auth_audit:
     image: "postgres"
     container_name: ${DOCKER_CONTAINER_NAME}
     restart: always
