@@ -3,6 +3,7 @@ package services
 import (
 	"auth_audit/internal/app/repository/interfaces"
 	"auth_audit/internal/app/repository/models"
+	"auth_audit/pkg/errors"
 	"crypto/rand"
 	"encoding/base64"
 	"time"
@@ -17,6 +18,10 @@ func NewSessionService(sessionRepository interfaces.SessionRepository) *SessionS
 }
 
 func (s SessionService) Create(userID uint) (*models.Session, error) {
+	if userID == 0 {
+		return nil, errors.NullForeignKey
+	}
+
 	token := s.generateToken()
 	for len(token) == 0 {
 		token = s.generateToken()

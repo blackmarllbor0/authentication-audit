@@ -4,7 +4,7 @@ import (
 	"auth_audit/internal/app/repository/models"
 	"auth_audit/internal/app/server/DTO"
 	"auth_audit/internal/app/server/services/interfaces"
-	"fmt"
+	"auth_audit/pkg/errors"
 	"github.com/jinzhu/gorm"
 )
 
@@ -27,7 +27,7 @@ func (s AuthService) Register(dto DTO.RegisterUserDTO) (*models.Session, error) 
 	}
 
 	if existingUser != nil {
-		return nil, fmt.Errorf("user with this login already exists")
+		return nil, errors.UserAlreadyExist
 	}
 
 	user, err := s.userService.CreateUser(dto)

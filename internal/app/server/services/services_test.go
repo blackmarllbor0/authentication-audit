@@ -1,15 +1,17 @@
 package services
 
 import (
-	"auth_audit/internal/app/repository/mocks"
+	repoMocks "auth_audit/internal/app/repository/mocks"
 	"auth_audit/internal/app/repository/models"
 	"auth_audit/internal/app/server/DTO"
+	"auth_audit/internal/app/server/services/mocks"
 	"auth_audit/pkg/errors"
-	"github.com/jinzhu/gorm"
-	"golang.org/x/crypto/bcrypt"
-	"testing"
 
+	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/mock"
+	"golang.org/x/crypto/bcrypt"
+
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -27,12 +29,12 @@ var _ = Describe("UserService", func() {
 	)
 
 	var (
-		ur *mocks.MockUserRepository
+		ur *repoMocks.MockUserRepository
 		us *UserService
 	)
 
 	BeforeEach(func() {
-		ur = &mocks.MockUserRepository{}
+		ur = &repoMocks.MockUserRepository{}
 		us = NewUserService(ur)
 	})
 
@@ -109,12 +111,12 @@ var _ = Describe("UserService", func() {
 
 var _ = Describe("SessionService", func() {
 	var (
-		sr *mocks.MockSessionRepository
+		sr *repoMocks.MockSessionRepository
 		ss *SessionService
 	)
 
 	BeforeEach(func() {
-		sr = &mocks.MockSessionRepository{}
+		sr = &repoMocks.MockSessionRepository{}
 		ss = NewSessionService(sr)
 	})
 
@@ -125,6 +127,78 @@ var _ = Describe("SessionService", func() {
 			session, err := ss.Create(1)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(session).ToNot(BeNil())
+		})
+
+		It("empty foreignKey", func() {
+			session, err := ss.Create(0)
+			Expect(session).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.NullForeignKey))
+		})
+	})
+})
+
+var _ = Describe("AuthService", func() {
+	var (
+		us  *mocks.MockUserService
+		ss  *mocks.MockSessionService
+		as  *AuthService
+		dto DTO.RegisterUserDTO
+	)
+
+	BeforeEach(func() {
+		us = &mocks.MockUserService{}
+		ss = &mocks.MockSessionService{}
+		as = NewAuthService(us, ss)
+
+		dto = DTO.RegisterUserDTO{
+			Login:    "login",
+			Password: "password_test",
+		}
+	})
+
+	Context("Register", func() {
+		var user *models.User
+
+		BeforeEach(func() {
+			user = &models.User{}
+		})
+
+		It("if such user already exists", func() {
+			us.On("GetUserByLogin", mock.Anything).Return(&models.User{
+				Login:        "a",
+				PasswordHash: "by",
+			}, nil)
+
+			session, err := as.Register(dto)
+			Expect(session).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.UserAlreadyExist))
+		})
+
+		It("user successfully registered", func() {
+			us.On("GetUserByLogin", mock.Anything).Return(nil, nil)
+			user.ID = 1
+			us.On("CreateUser", mock.Anything).Return(user, nil)
+
+			ss.On("Create", user.ID).Return(&models.Session{UserID: user.ID}, nil)
+
+			session, err := as.Register(dto)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(session).ToNot(BeNil())
+			Expect(session.UserID).To(Equal(user.ID))
+		})
+
+		It("empty user.ID for session foreignKey", func() {
+			us.On("GetUserByLogin", mock.Anything).Return(nil, nil)
+			user.ID = 0
+			us.On("CreateUser", mock.Anything).Return(user, nil)
+			ss.On("Create", user.ID).Return(nil, errors.NullForeignKey)
+
+			session, err := as.Register(dto)
+			Expect(session).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.NullForeignKey))
 		})
 	})
 })
