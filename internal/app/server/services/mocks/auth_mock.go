@@ -20,7 +20,7 @@ func (_m *MockAuthService) Register(dto DTO.RegisterUserDTO) (*models.Session, e
 	return nil, args.Error(1)
 }
 
-func (_m *MockAuthService) Login(login, pwd string) (*models.Session, error) {
+func (_m *MockAuthService) Login(dto DTO.LoginUserDTO) (*models.Session, error) {
 	//TODO implement me
 	panic("implement me")
 }

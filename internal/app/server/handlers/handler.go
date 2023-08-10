@@ -20,6 +20,7 @@ func (h Handler) Router() *gin.Engine {
 	auth := router.Group("/auth")
 	{
 		auth.POST("/register", h.register)
+		auth.POST("/login", h.login)
 	}
 
 	return router

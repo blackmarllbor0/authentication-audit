@@ -7,5 +7,5 @@ import (
 
 type AuthService interface {
 	Register(dto DTO.RegisterUserDTO) (*models.Session, error)
-	Login(login, pwd string) (*models.Session, error)
+	Login(dto DTO.LoginUserDTO) (*models.Session, error)
 }
