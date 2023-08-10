@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"auth_audit/internal/app/server/DTO"
+	"auth_audit/pkg/errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,7 +16,7 @@ func (h Handler) register(ctx *gin.Context) {
 	}
 
 	if body.Login == "" || body.Password == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "login and password must be provided"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": errors.MustBeProvidedLoginAndPwd.Error()})
 		return
 	}
 
@@ -25,6 +26,5 @@ func (h Handler) register(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusCreated)
-	ctx.JSON(http.StatusOK, gin.H{"token": session.Token})
+	ctx.JSON(http.StatusCreated, gin.H{"token": session.Token})
 }
