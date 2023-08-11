@@ -62,7 +62,23 @@ func (s AuthService) Login(dto DTO.LoginUserDTO) (*models.Session, error) {
 		return nil, err
 	}
 
+	if user.Blocked {
+		return nil, errors.UserHasBeenBlocked
+	}
+
+	if user.FailedLoginAttempts >= 5 {
+		if err := s.userService.BlockUser(user.ID); err != nil {
+			return nil, err
+		}
+
+		return nil, errors.UserHasBeenBlocked
+	}
+
 	if !s.checkPassword(dto.Password, user.PasswordHash) {
+		if _, err := s.userService.IncrementFailedLoginAttempts(user.ID); err != nil {
+			return nil, err
+		}
+
 		return nil, errors.InvalidLoginOrPassword
 	}
 

@@ -42,6 +42,14 @@ func (s UserService) GetUserByLogin(login string) (*models.User, error) {
 	return s.userRepository.GetByLogin(login)
 }
 
+func (s UserService) BlockUser(userID uint) error {
+	return s.userRepository.Block(userID)
+}
+
+func (s UserService) IncrementFailedLoginAttempts(userID uint) (int, error) {
+	return s.userRepository.IncrementFailedLoginAttempts(userID)
+}
+
 func (s UserService) hashPwd(pwd string) (string, error) {
 	if len(pwd) < 8 {
 		return "", errors.ShortPassword
