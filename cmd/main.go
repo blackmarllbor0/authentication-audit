@@ -33,10 +33,12 @@ func main() {
 
 	userRepo := postgres.NewUserRepository(DB)
 	sessionRepo := postgres.NewSessionRepository(DB)
+	authAuditRepo := postgres.NewAuthenticationAudit(DB)
 
 	userService := services.NewUserService(userRepo)
 	sessionService := services.NewSessionService(sessionRepo)
-	authService := services.NewAuthService(userService, sessionService)
+	authAuditService := services.NewAuthAuditService(authAuditRepo)
+	authService := services.NewAuthService(userService, sessionService, authAuditService)
 
 	handler := handlers.NewHandler(authService)
 

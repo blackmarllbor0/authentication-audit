@@ -5,14 +5,19 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func NewAuthenticationAudit(db *gorm.DB) *AuthenticationAudit {
-	return &AuthenticationAudit{db: db}
-}
-
 type AuthenticationAudit struct {
 	db *gorm.DB
 }
 
-func (r AuthenticationAudit) Save(log *models.AuthenticationAudit) error {
-	return r.db.Create(&log).Error
+func NewAuthenticationAudit(db *gorm.DB) *AuthenticationAudit {
+	return &AuthenticationAudit{db: db}
+}
+
+func (r AuthenticationAudit) Create(audit *models.AuthenticationAudit) error {
+	return r.db.Create(&audit).Error
+}
+
+func (r AuthenticationAudit) GetAllAuditsByUserID(userID uint) ([]*models.AuthenticationAudit, error) {
+	//TODO implement me
+	panic("implement me")
 }

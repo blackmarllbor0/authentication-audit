@@ -10,14 +10,20 @@ import (
 )
 
 type AuthService struct {
-	userService    interfaces.UserService
-	sessionService interfaces.SessionService
+	userService      interfaces.UserService
+	sessionService   interfaces.SessionService
+	authAuditService interfaces.AuthAuditService
 }
 
-func NewAuthService(userService interfaces.UserService, sessionService interfaces.SessionService) *AuthService {
+func NewAuthService(
+	userService interfaces.UserService,
+	sessionService interfaces.SessionService,
+	authAuditService interfaces.AuthAuditService,
+) *AuthService {
 	return &AuthService{
-		userService:    userService,
-		sessionService: sessionService,
+		userService:      userService,
+		sessionService:   sessionService,
+		authAuditService: authAuditService,
 	}
 }
 
@@ -71,6 +77,10 @@ func (s AuthService) Login(dto DTO.LoginUserDTO) (*models.Session, error) {
 			return nil, err
 		}
 
+		if err := s.authAuditService.Create(Blocked, user.ID); err != nil {
+			return nil, err
+		}
+
 		return nil, errors.UserHasBeenBlocked
 	}
 
@@ -79,11 +89,19 @@ func (s AuthService) Login(dto DTO.LoginUserDTO) (*models.Session, error) {
 			return nil, err
 		}
 
+		if err := s.authAuditService.Create(IncorrectPassword, user.ID); err != nil {
+			return nil, err
+		}
+
 		return nil, errors.InvalidLoginOrPassword
 	}
 
 	session, err := s.sessionService.Create(user.ID)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.authAuditService.Create(SuccessfulLogin, user.ID); err != nil {
 		return nil, err
 	}
 
