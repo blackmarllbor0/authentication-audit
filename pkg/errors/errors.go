@@ -9,4 +9,6 @@ var (
 	MustBeProvidedLoginAndPwd = errors.New("login and password must be provided")
 	InvalidLoginOrPassword    = errors.New("wrong login or password")
 	UserHasBeenBlocked        = errors.New("user has been blocked")
+	TokenIsEmpty              = errors.New("token is empty")
+	TokenHasExpired           = errors.New("the token has expired")
 )

@@ -17,7 +17,12 @@ func (r AuthenticationAudit) Create(audit *models.AuthenticationAudit) error {
 	return r.db.Create(&audit).Error
 }
 
-func (r AuthenticationAudit) GetAllAuditsByUserID(userID uint) ([]*models.AuthenticationAudit, error) {
-	//TODO implement me
-	panic("implement me")
+func (r AuthenticationAudit) GetAllAuditsByUserID(userID uint) ([]models.AuthenticationAudit, error) {
+	var auditEntries []models.AuthenticationAudit
+
+	if err := r.db.Where("user_id = ?", userID).Find(&auditEntries).Error; err != nil {
+		return nil, err
+	}
+
+	return auditEntries, nil
 }

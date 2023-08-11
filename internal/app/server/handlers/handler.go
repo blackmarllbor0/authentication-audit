@@ -21,6 +21,7 @@ func (h Handler) Router() *gin.Engine {
 	{
 		auth.POST("/register", h.register)
 		auth.POST("/login", h.login)
+		auth.GET("/audit", h.getAuthAuditByToken)
 	}
 
 	return router

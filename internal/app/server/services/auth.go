@@ -108,6 +108,33 @@ func (s AuthService) Login(dto DTO.LoginUserDTO) (*models.Session, error) {
 	return session, nil
 }
 
+func (s AuthService) GetAuthAuditByToken(token string) ([]DTO.AuthAuditDTO, error) {
+	session, err := s.sessionService.GetByToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.userService.GetUserByID(session.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	auditEntries, err := s.authAuditService.GetAllAuditsByUserID(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	auditDTOs := make([]DTO.AuthAuditDTO, len(auditEntries))
+	for i, entry := range auditEntries {
+		auditDTOs[i] = DTO.AuthAuditDTO{
+			Timestamp: entry.Time,
+			Event:     entry.Event,
+		}
+	}
+
+	return auditDTOs, nil
+}
+
 func (s AuthService) checkPassword(pwd, hashPwd string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hashPwd), []byte(pwd)) == nil
 }

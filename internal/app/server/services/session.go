@@ -40,6 +40,23 @@ func (s SessionService) Create(userID uint) (*models.Session, error) {
 	return session, nil
 }
 
+func (s SessionService) GetByToken(token string) (*models.Session, error) {
+	if len(token) == 0 {
+		return nil, errors.TokenIsEmpty
+	}
+
+	session, err := s.sessionRepository.GetByToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	if !session.LiveTime.After(time.Now()) {
+		return nil, errors.TokenHasExpired
+	}
+
+	return session, nil
+}
+
 func (s SessionService) generateToken() string {
 	buffer := make([]byte, 32)
 	_, err := rand.Read(buffer)

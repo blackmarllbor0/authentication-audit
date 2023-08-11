@@ -42,6 +42,10 @@ func (s UserService) GetUserByLogin(login string) (*models.User, error) {
 	return s.userRepository.GetByLogin(login)
 }
 
+func (s UserService) GetUserByID(ID uint) (*models.User, error) {
+	return s.userRepository.GetById(ID)
+}
+
 func (s UserService) BlockUser(userID uint) error {
 	return s.userRepository.Block(userID)
 }

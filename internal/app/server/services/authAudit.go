@@ -29,3 +29,7 @@ func (s AuthAuditService) Create(event string, userID uint) error {
 
 	return s.authAuditRepo.Create(audit)
 }
+
+func (s AuthAuditService) GetAllAuditsByUserID(userID uint) ([]models.AuthenticationAudit, error) {
+	return s.authAuditRepo.GetAllAuditsByUserID(userID)
+}
