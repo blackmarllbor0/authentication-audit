@@ -10,6 +10,16 @@ type MockUserService struct {
 	mock.Mock
 }
 
+func (_m *MockUserService) BlockUser(userID uint) error {
+	args := _m.Called(userID)
+	return args.Error(0)
+}
+
+func (_m *MockUserService) IncrementFailedLoginAttempts(userID uint) (int, error) {
+	args := _m.Called(userID)
+	return args.Get(0).(int), args.Error(1)
+}
+
 func (_m *MockUserService) CreateUser(createUserDTO DTO.RegisterUserDTO) (*models.User, error) {
 	args := _m.Called(createUserDTO)
 

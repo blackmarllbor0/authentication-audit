@@ -140,18 +140,26 @@ var _ = Describe("SessionService", func() {
 
 var _ = Describe("AuthService", func() {
 	var (
-		us  *mocks.MockUserService
-		ss  *mocks.MockSessionService
-		as  *AuthService
-		dto DTO.RegisterUserDTO
+		us          *mocks.MockUserService
+		ss          *mocks.MockSessionService
+		aas         *mocks.MockAuthAudit
+		as          *AuthService
+		registerDto DTO.RegisterUserDTO
+		loginDto    DTO.LoginUserDTO
 	)
 
 	BeforeEach(func() {
 		us = &mocks.MockUserService{}
 		ss = &mocks.MockSessionService{}
-		as = NewAuthService(us, ss)
+		aas = &mocks.MockAuthAudit{}
+		as = NewAuthService(us, ss, aas)
 
-		dto = DTO.RegisterUserDTO{
+		registerDto = DTO.RegisterUserDTO{
+			Login:    "login",
+			Password: "password_test",
+		}
+
+		loginDto = DTO.LoginUserDTO{
 			Login:    "login",
 			Password: "password_test",
 		}
@@ -170,7 +178,7 @@ var _ = Describe("AuthService", func() {
 				PasswordHash: "by",
 			}, nil)
 
-			session, err := as.Register(dto)
+			session, err := as.Register(registerDto)
 			Expect(session).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(err).To(Equal(errors.UserAlreadyExist))
@@ -183,7 +191,7 @@ var _ = Describe("AuthService", func() {
 
 			ss.On("Create", user.ID).Return(&models.Session{UserID: user.ID}, nil)
 
-			session, err := as.Register(dto)
+			session, err := as.Register(registerDto)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(session).ToNot(BeNil())
 			Expect(session.UserID).To(Equal(user.ID))
@@ -195,10 +203,85 @@ var _ = Describe("AuthService", func() {
 			us.On("CreateUser", mock.Anything).Return(user, nil)
 			ss.On("Create", user.ID).Return(nil, errors.NullForeignKey)
 
-			session, err := as.Register(dto)
+			session, err := as.Register(registerDto)
 			Expect(session).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(err).To(Equal(errors.NullForeignKey))
+		})
+	})
+
+	Context("Login", func() {
+		It("empty login or/and password", func() {
+			s, err := as.Login(DTO.LoginUserDTO{})
+			Expect(s).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.MustBeProvidedLoginAndPwd))
+		})
+
+		It("unable to fin user", func() {
+			us.On("GetUserByLogin", mock.Anything).Return(nil, gorm.ErrRecordNotFound)
+			s, err := as.Login(loginDto)
+			Expect(s).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.InvalidLoginOrPassword))
+		})
+
+		It("user has been blocked", func() {
+			us.On("GetUserByLogin", mock.Anything).Return(&models.User{
+				Blocked: true,
+			}, nil)
+
+			s, err := as.Login(loginDto)
+			Expect(s).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.UserHasBeenBlocked))
+		})
+
+		It("more than 5 login attempts", func() {
+			us.On("GetUserByLogin", mock.Anything).Return(&models.User{
+				FailedLoginAttempts: 5,
+			}, nil)
+			us.On("BlockUser", mock.Anything).Return(nil)
+			aas.On("Create", mock.Anything, mock.Anything).Return(nil)
+
+			s, err := as.Login(loginDto)
+			Expect(s).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.UserHasBeenBlocked))
+		})
+
+		It("wrong passwords when comparing", func() {
+			us.On("GetUserByLogin", mock.Anything).Return(&models.User{
+				PasswordHash: "something_password",
+			}, nil)
+			us.On("IncrementFailedLoginAttempts", mock.Anything).Return(0, nil)
+			aas.On("Create", mock.Anything, mock.Anything).Return(nil)
+
+			s, err := as.Login(loginDto)
+			Expect(s).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(errors.InvalidLoginOrPassword))
+		})
+
+		It("user successfully logged in", func() {
+			bytes, err := bcrypt.GenerateFromPassword([]byte(loginDto.Password), bcrypt.DefaultCost)
+			Expect(err).ToNot(HaveOccurred())
+
+			user := &models.User{
+				PasswordHash: string(bytes),
+			}
+			user.ID = 1
+
+			us.On("GetUserByLogin", mock.Anything).Return(user, nil)
+			ss.On("Create", user.ID).Return(&models.Session{
+				UserID: user.ID,
+			}, nil)
+			aas.On("Create", mock.Anything, user.ID).Return(nil)
+
+			s, err := as.Login(loginDto)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(s).ToNot(BeNil())
+			Expect(s.UserID).To(Equal(user.ID))
 		})
 	})
 })

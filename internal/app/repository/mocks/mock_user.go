@@ -29,7 +29,10 @@ func (_m *MockUserRepository) GetById(ID uint) (*models.User, error) {
 	panic("implement me")
 }
 
-func (_m *MockUserRepository) Block() {
-	//TODO implement me
-	panic("implement me")
+func (_m *MockUserRepository) Block(userID uint) error {
+	panic("")
+}
+
+func (_m *MockUserRepository) IncrementFailedLoginAttempts(userID uint) (attempt int, err error) {
+	panic("")
 }

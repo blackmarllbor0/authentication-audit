@@ -205,6 +205,41 @@ var _ = Describe("SessionRepository", func() {
 	})
 })
 
+var _ = Describe("AuthenticationAudit", func() {
+	var (
+		DB *gorm.DB
+		ar *AuthenticationAudit
+	)
+
+	BeforeEach(func() {
+		DB = connectToDB()
+
+		ar = NewAuthenticationAudit(DB)
+	})
+
+	Context("Create", func() {
+		It("audit successfully created", func() {
+			ur := NewUserRepository(DB)
+
+			var user models.User
+			err := ur.Create(&user)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(user.ID).ToNot(Equal(0))
+
+			audit := &models.AuthenticationAudit{
+				UserID: user.ID,
+				Event:  "something",
+				Time:   time.Now(),
+			}
+
+			err = ar.Create(audit)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(audit).ToNot(BeNil())
+			Expect(audit.ID).ToNot(Equal(0))
+		})
+	})
+})
+
 func connectToDB() *gorm.DB {
 	cvg := config.NewConfig(viper.New())
 	err := cvg.LoadConfig("../../../../config", "yaml", "config")
