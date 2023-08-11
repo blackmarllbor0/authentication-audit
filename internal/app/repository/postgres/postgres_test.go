@@ -130,6 +130,33 @@ var _ = Describe("UserRepository", func() {
 		})
 	})
 
+	Context("IncrementFailedLoginAttempts", func() {
+		It("login attempt increment", func() {
+			err := ur.Create(user)
+			Expect(err).ToNot(HaveOccurred())
+
+			attempt, err := ur.IncrementFailedLoginAttempts(user.ID)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(attempt).To(Equal(1))
+		})
+	})
+
+	Context("Blocked", func() {
+		It("user has been blocked", func() {
+			err := ur.Create(user)
+			Expect(err).ToNot(HaveOccurred())
+
+			err = ur.Block(user.ID)
+			Expect(err).ToNot(HaveOccurred())
+
+			findUser, err := ur.GetById(user.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(findUser).ToNot(BeNil())
+			Expect(findUser.Blocked).To(Equal(true))
+		})
+	})
+
 	AfterEach(func() {
 		err := DB.Close()
 		Expect(err).ToNot(HaveOccurred())

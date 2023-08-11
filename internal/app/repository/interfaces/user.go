@@ -6,5 +6,6 @@ type UserRepository interface {
 	Create(user *models.User) error
 	GetByLogin(login string) (*models.User, error)
 	GetById(ID uint) (*models.User, error)
-	Block()
+	Block(userID uint) error
+	IncrementFailedLoginAttempts(userID uint) (attempt int, err error)
 }

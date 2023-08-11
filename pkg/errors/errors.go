@@ -8,4 +8,5 @@ var (
 	NullForeignKey            = errors.New("cannot bind foreignKey to null ID")
 	MustBeProvidedLoginAndPwd = errors.New("login and password must be provided")
 	InvalidLoginOrPassword    = errors.New("wrong login or password")
+	UserHasBeenBlocked        = errors.New("user has been blocked")
 )
