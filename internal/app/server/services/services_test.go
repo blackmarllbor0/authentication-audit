@@ -6,6 +6,7 @@ import (
 	"auth_audit/internal/app/server/DTO"
 	"auth_audit/internal/app/server/services/mocks"
 	"auth_audit/pkg/errors"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/mock"
@@ -90,7 +91,7 @@ var _ = Describe("UserService", func() {
 		})
 	})
 
-	Context("HashPwd", func() {
+	Context("hashPwd", func() {
 		It("should hash the password", func() {
 			hash, err := us.hashPwd(pwd)
 			Expect(err).ToNot(HaveOccurred())
@@ -134,6 +135,47 @@ var _ = Describe("SessionService", func() {
 			Expect(session).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(err).To(Equal(errors.NullForeignKey))
+		})
+	})
+
+	Context("GetByToken", func() {
+		It("token is empty", func() {
+			session, err := ss.GetByToken("")
+			Expect(session).To(BeNil())
+			Expect(err).To(Equal(errors.TokenIsEmpty))
+		})
+
+		It("with valid token", func() {
+			currentTime := time.Now()
+			validSession := &models.Session{
+				Token:    "valid_token",
+				LiveTime: currentTime.Add(time.Hour),
+			}
+
+			sr.On("GetByToken", validSession.Token).Return(validSession, nil)
+			session, err := ss.GetByToken(validSession.Token)
+			Expect(session).To(Equal(validSession))
+			Expect(err).To(BeNil())
+		})
+
+		It("with expired token should return TokenHasExpired error", func() {
+			expiredSession := &models.Session{
+				Token:    "expired_token",
+				LiveTime: time.Now().Add(-time.Hour),
+			}
+
+			sr.On("GetByToken", expiredSession.Token).Return(expiredSession, nil)
+
+			session, err := ss.GetByToken("expired_token")
+			Expect(session).To(BeNil())
+			Expect(err).To(Equal(errors.TokenHasExpired))
+		})
+	})
+
+	Context("generateToken", func() {
+		It("length should be 32", func() {
+			token := ss.generateToken()
+			Expect(token).To(HaveLen(32))
 		})
 	})
 })
@@ -218,7 +260,7 @@ var _ = Describe("AuthService", func() {
 			Expect(err).To(Equal(errors.MustBeProvidedLoginAndPwd))
 		})
 
-		It("unable to fin user", func() {
+		It("unable to find user", func() {
 			us.On("GetUserByLogin", mock.Anything).Return(nil, gorm.ErrRecordNotFound)
 			s, err := as.Login(loginDto)
 			Expect(s).To(BeNil())
@@ -282,6 +324,23 @@ var _ = Describe("AuthService", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(s).ToNot(BeNil())
 			Expect(s.UserID).To(Equal(user.ID))
+		})
+	})
+
+	Context("GetAuthAuditByToken", func() {
+		It("should be return 1 audits", func() {
+			ss.On("GetByToken", mock.Anything).Return(&models.Session{UserID: 1}, nil)
+			var user models.User
+			user.ID = 1
+			us.On("GetUserByID", mock.Anything).Return(&user, nil)
+			aas.On("GetAllAuditsByUserID", mock.Anything).Return([]models.AuthenticationAudit{{
+				Time:  time.Now(),
+				Event: "test",
+			}}, nil)
+
+			audits, err := as.GetAuthAuditByToken("token")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(audits).To(HaveLen(1))
 		})
 	})
 })

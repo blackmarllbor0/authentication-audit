@@ -142,7 +142,7 @@ var _ = Describe("UserRepository", func() {
 		})
 	})
 
-	Context("Blocked", func() {
+	Context("Block", func() {
 		It("user has been blocked", func() {
 			err := ur.Create(user)
 			Expect(err).ToNot(HaveOccurred())
@@ -199,6 +199,15 @@ var _ = Describe("SessionRepository", func() {
 		})
 	})
 
+	Context("GetByToken", func() {
+		It("should be return session", func() {
+			s, err := sr.GetByToken(session.Token)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(s).ToNot(BeNil())
+			Expect(s.Token).To(Equal(session.Token))
+		})
+	})
+
 	AfterEach(func() {
 		err := DB.Close()
 		Expect(err).ToNot(HaveOccurred())
@@ -207,8 +216,9 @@ var _ = Describe("SessionRepository", func() {
 
 var _ = Describe("AuthenticationAudit", func() {
 	var (
-		DB *gorm.DB
-		ar *AuthenticationAudit
+		DB   *gorm.DB
+		ar   *AuthenticationAudit
+		user models.User
 	)
 
 	BeforeEach(func() {
@@ -221,7 +231,6 @@ var _ = Describe("AuthenticationAudit", func() {
 		It("audit successfully created", func() {
 			ur := NewUserRepository(DB)
 
-			var user models.User
 			err := ur.Create(&user)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(user.ID).ToNot(Equal(0))
@@ -236,6 +245,20 @@ var _ = Describe("AuthenticationAudit", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(audit).ToNot(BeNil())
 			Expect(audit.ID).ToNot(Equal(0))
+		})
+	})
+
+	Context("GetAllAuditsByUserID", func() {
+		It("if user not exist", func() {
+			audits, err := ar.GetAllAuditsByUserID(44)
+			Expect(audits).To(HaveLen(0))
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("should be return audits", func() {
+			audits, err := ar.GetAllAuditsByUserID(user.ID)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(audits).To(HaveLen(1))
 		})
 	})
 })

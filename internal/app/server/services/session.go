@@ -64,6 +64,5 @@ func (s SessionService) generateToken() string {
 		return ""
 	}
 
-	return base64.URLEncoding.EncodeToString(buffer)
-
+	return base64.URLEncoding.EncodeToString(buffer)[:32]
 }

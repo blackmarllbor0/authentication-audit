@@ -10,6 +10,16 @@ type MockUserService struct {
 	mock.Mock
 }
 
+func (_m *MockUserService) GetUserByID(ID uint) (*models.User, error) {
+	args := _m.Called(ID)
+
+	if user := args.Get(0); user != nil {
+		return user.(*models.User), args.Error(1)
+	}
+
+	return nil, args.Error(1)
+}
+
 func (_m *MockUserService) BlockUser(userID uint) error {
 	args := _m.Called(userID)
 	return args.Error(0)
