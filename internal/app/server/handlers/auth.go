@@ -51,3 +51,14 @@ func (h Handler) getAuthAuditByToken(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"audit": audit})
 }
+
+func (h Handler) clearAuthAuditsByToken(ctx *gin.Context) {
+	token := ctx.GetHeader("X-Token")
+
+	if err := h.authService.ClearAuthAuditsByToken(token); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"msg": "authentication audit cleared"})
+}

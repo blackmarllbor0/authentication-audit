@@ -1,16 +1,21 @@
 package handlers
 
 import (
+	"auth_audit/internal/app/server/middlewares"
 	"auth_audit/internal/app/server/services/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	authService interfaces.AuthService
+	authService   interfaces.AuthService
+	validateToken interfaces.ValidateToken
 }
 
-func NewHandler(authService interfaces.AuthService) *Handler {
-	return &Handler{authService: authService}
+func NewHandler(authService interfaces.AuthService, validateToken interfaces.ValidateToken) *Handler {
+	return &Handler{
+		authService:   authService,
+		validateToken: validateToken,
+	}
 }
 
 func (h Handler) Router() *gin.Engine {
@@ -21,7 +26,13 @@ func (h Handler) Router() *gin.Engine {
 	{
 		auth.POST("/register", h.register)
 		auth.POST("/login", h.login)
-		auth.GET("/audit", h.getAuthAuditByToken)
+
+		needToken := auth.Group("/audits")
+		needToken.Use(middlewares.AuthMiddleware(h.validateToken))
+		{
+			needToken.GET("/", h.getAuthAuditByToken)
+			needToken.DELETE("/", h.clearAuthAuditsByToken)
+		}
 	}
 
 	return router

@@ -26,3 +26,7 @@ func (r AuthenticationAudit) GetAllAuditsByUserID(userID uint) ([]models.Authent
 
 	return auditEntries, nil
 }
+
+func (r AuthenticationAudit) ClearAuthAuditsByToken(userID uint) error {
+	return r.db.Where("user_id = ?", userID).Delete(&models.AuthenticationAudit{}).Error
+}

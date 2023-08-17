@@ -33,3 +33,7 @@ func (s AuthAuditService) Create(event string, userID uint) error {
 func (s AuthAuditService) GetAllAuditsByUserID(userID uint) ([]models.AuthenticationAudit, error) {
 	return s.authAuditRepo.GetAllAuditsByUserID(userID)
 }
+
+func (s AuthAuditService) ClearAuthAuditsByToken(userID uint) error {
+	return s.authAuditRepo.ClearAuthAuditsByToken(userID)
+}

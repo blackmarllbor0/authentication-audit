@@ -9,6 +9,11 @@ type MockSessionService struct {
 	mock.Mock
 }
 
+func (_m *MockSessionService) ValidateToken(token string) error {
+	args := _m.Called()
+	return args.Error(0)
+}
+
 func (_m *MockSessionService) GetByToken(token string) (*models.Session, error) {
 	args := _m.Called(token)
 

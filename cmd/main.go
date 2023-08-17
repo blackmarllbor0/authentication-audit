@@ -40,7 +40,7 @@ func main() {
 	authAuditService := services.NewAuthAuditService(authAuditRepo)
 	authService := services.NewAuthService(userService, sessionService, authAuditService)
 
-	handler := handlers.NewHandler(authService)
+	handler := handlers.NewHandler(authService, sessionService)
 
 	srv := server.NewServer(configService)
 	if err := srv.Run(handler.Router()); err != nil {

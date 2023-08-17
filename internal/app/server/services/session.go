@@ -50,11 +50,24 @@ func (s SessionService) GetByToken(token string) (*models.Session, error) {
 		return nil, err
 	}
 
-	if !session.LiveTime.After(time.Now()) {
-		return nil, errors.TokenHasExpired
+	return session, nil
+}
+
+func (s SessionService) ValidateToken(token string) error {
+	if token == "" {
+		return errors.TokenIsEmpty
 	}
 
-	return session, nil
+	session, err := s.GetByToken(token)
+	if err != nil {
+		return err
+	}
+
+	if !session.LiveTime.After(time.Now()) {
+		return errors.TokenHasExpired
+	}
+
+	return nil
 }
 
 func (s SessionService) generateToken() string {

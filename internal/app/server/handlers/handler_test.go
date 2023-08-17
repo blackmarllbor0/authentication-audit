@@ -32,7 +32,8 @@ var _ = Describe("Handler", func() {
 		gin.SetMode(gin.TestMode)
 		router = gin.Default()
 		as = &mocks.MockAuthService{}
-		h := NewHandler(as)
+		ss := &mocks.MockSessionService{}
+		h := NewHandler(as, ss)
 		router.POST("/auth/register", h.register)
 		router.POST("/auth/login", h.login)
 		router.GET("/auth/audit", h.getAuthAuditByToken)

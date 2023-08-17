@@ -139,6 +139,19 @@ func (s AuthService) GetAuthAuditByToken(token string) ([]DTO.AuthAuditDTO, erro
 	return auditDTOs, nil
 }
 
+func (s AuthService) ClearAuthAuditsByToken(token string) error {
+	session, err := s.sessionService.GetByToken(token)
+	if err != nil {
+		return err
+	}
+
+	if err := s.authAuditService.ClearAuthAuditsByToken(session.UserID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s AuthService) checkPassword(pwd, hashPwd string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hashPwd), []byte(pwd)) == nil
 }
