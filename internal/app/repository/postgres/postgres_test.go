@@ -103,6 +103,8 @@ var _ = Describe("UserRepository", func() {
 	Context("GetById", func() {
 		It("managed to find the user", func() {
 			err := ur.Create(user)
+			Expect(err).ToNot(HaveOccurred())
+
 			findUser, err := ur.GetById(user.ID)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(findUser).ToNot(BeNil())
@@ -118,6 +120,7 @@ var _ = Describe("UserRepository", func() {
 	Context("GetByLogin", func() {
 		It("managed to find the user", func() {
 			err := ur.Create(user)
+			Expect(err).ToNot(HaveOccurred())
 			findUser, err := ur.GetByLogin(user.Login)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(findUser).ToNot(BeNil())
