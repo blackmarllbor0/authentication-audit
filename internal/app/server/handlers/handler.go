@@ -4,6 +4,8 @@ import (
 	"auth_audit/internal/app/server/middlewares"
 	"auth_audit/internal/app/server/services/interfaces"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Handler struct {
@@ -21,6 +23,8 @@ func NewHandler(authService interfaces.AuthService, validateToken interfaces.Val
 func (h Handler) Router() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	auth := router.Group("/auth")
 	{

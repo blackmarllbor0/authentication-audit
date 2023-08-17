@@ -9,9 +9,13 @@ import (
 	"github.com/spf13/viper"
 	"log"
 
+	_ "auth_audit/docs"
 	_ "github.com/lib/pq"
 )
 
+// @Title			auth-audit API
+// @version		1.0.0
+// @description	API for working with user authorization history
 func main() {
 	configService := config.NewConfig(viper.New())
 	if err := configService.LoadConfig("config", "yaml", "config"); err != nil {
@@ -43,6 +47,7 @@ func main() {
 	handler := handlers.NewHandler(authService, sessionService)
 
 	srv := server.NewServer(configService)
+
 	if err := srv.Run(handler.Router()); err != nil {
 		log.Fatal(err)
 	}
