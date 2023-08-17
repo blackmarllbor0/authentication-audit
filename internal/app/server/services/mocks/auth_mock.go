@@ -11,8 +11,8 @@ type MockAuthService struct {
 }
 
 func (_m *MockAuthService) ClearAuthAuditsByToken(token string) error {
-	//TODO implement me
-	panic("implement me")
+	args := _m.Called(token)
+	return args.Error(0)
 }
 
 func (_m *MockAuthService) GetAuthAuditByToken(token string) ([]DTO.AuthAuditDTO, error) {

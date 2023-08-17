@@ -164,7 +164,7 @@ var _ = Describe("SessionService", func() {
 				LiveTime: time.Now().Add(-time.Hour),
 			}
 
-			sr.On("GetByToken", expiredSession.Token).Return(expiredSession, nil)
+			sr.On("GetByToken", expiredSession.Token).Return(nil, errors.TokenHasExpired)
 
 			session, err := ss.GetByToken("expired_token")
 			Expect(session).To(BeNil())

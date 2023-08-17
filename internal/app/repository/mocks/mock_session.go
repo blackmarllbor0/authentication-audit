@@ -11,7 +11,12 @@ type MockSessionRepository struct {
 
 func (_m *MockSessionRepository) GetByToken(token string) (*models.Session, error) {
 	args := _m.Called(token)
-	return args.Get(0).(*models.Session), args.Error(1)
+
+	if s := args.Get(0); s != nil {
+		return s.(*models.Session), nil
+	}
+
+	return nil, args.Error(1)
 }
 
 func (_m *MockSessionRepository) Create(session *models.Session) error {

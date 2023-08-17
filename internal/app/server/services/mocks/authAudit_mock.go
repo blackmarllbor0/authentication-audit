@@ -9,6 +9,11 @@ type MockAuthAudit struct {
 	mock.Mock
 }
 
+func (_m *MockAuthAudit) ClearAuthAuditsByToken(userID uint) error {
+	args := _m.Called(userID)
+	return args.Error(0)
+}
+
 func (_m *MockAuthAudit) GetAllAuditsByUserID(userID uint) ([]models.AuthenticationAudit, error) {
 	args := _m.Called(userID)
 	return args.Get(0).([]models.AuthenticationAudit), args.Error(1)
