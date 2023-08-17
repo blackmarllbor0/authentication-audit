@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,6 +34,8 @@ var _ = Describe("Handler", func() {
 		as = &mocks.MockAuthService{}
 		h := NewHandler(as)
 		router.POST("/auth/register", h.register)
+		router.POST("/auth/login", h.login)
+		router.GET("/auth/audit", h.getAuthAuditByToken)
 	})
 
 	Context("register", func() {
@@ -73,6 +76,80 @@ var _ = Describe("Handler", func() {
 			router.ServeHTTP(w, req)
 
 			Expect(w.Code).To(Equal(http.StatusBadRequest))
+		})
+	})
+
+	Context("login", func() {
+		It("with valid request body should return a token when login is successful", func() {
+			body := `{"login": "test_login", "password": "test_password"}`
+
+			as.On("Login", DTO.LoginUserDTO{
+				Login:    "test_login",
+				Password: "test_password",
+			}).Return(&models.Session{
+				Token: "test_token",
+			}, nil)
+
+			req, err := http.NewRequest(http.MethodPost, "/auth/login", strings.NewReader(body))
+			Expect(err).ToNot(HaveOccurred())
+
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			Expect(w.Code).To(Equal(http.StatusOK))
+			Expect(w.Body.String()).To(Equal(`{"token":"test_token"}`))
+		})
+
+		It("with invalid request body should return a 400 status with error message", func() {
+			invalidBody := `{"password": ""}`
+
+			as.On("Login", DTO.LoginUserDTO{
+				Login:    "",
+				Password: "",
+			}).Return(nil, errors.MustBeProvidedLoginAndPwd)
+
+			req, err := http.NewRequest(http.MethodPost, "/auth/login", strings.NewReader(invalidBody))
+			Expect(err).ToNot(HaveOccurred())
+
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			Expect(w.Code).To(Equal(http.StatusBadRequest))
+			Expect(w.Body.String()).To(Equal(`{"error":"login and password must be provided"}`))
+		})
+	})
+
+	Context("getAuthAuditByToken", func() {
+		It("with invalid token should return a 500 status with error message", func() {
+			as.On("GetAuthAuditByToken", mock.Anything).Return(nil, errors.TokenHasExpired)
+
+			req, err := http.NewRequest(http.MethodGet, "/auth/audit", nil)
+			Expect(err).ToNot(HaveOccurred())
+			req.Header.Set("X-Token", "invalid-token")
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			Expect(w.Code).To(Equal(http.StatusInternalServerError))
+			Expect(w.Body.String()).To(Equal(`{"error":"the token has expired"}`))
+		})
+
+		It("with valid token should return a 200 status with audit data", func() {
+			token := "token"
+			as.On("GetAuthAuditByToken", mock.Anything).Return([]DTO.AuthAuditDTO{{
+				Timestamp: time.Now(),
+				Event:     "event",
+			}}, nil)
+
+			req, err := http.NewRequest(http.MethodGet, "/auth/audit", nil)
+			Expect(err).ToNot(HaveOccurred())
+			req.Header.Set("X-Token", token)
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+			Expect(w.Code).To(Equal(http.StatusOK))
 		})
 	})
 })

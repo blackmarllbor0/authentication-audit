@@ -10,6 +10,16 @@ type MockAuthService struct {
 	mock.Mock
 }
 
+func (_m *MockAuthService) GetAuthAuditByToken(token string) ([]DTO.AuthAuditDTO, error) {
+	args := _m.Called(token)
+
+	if DTOs := args.Get(0); DTOs != nil {
+		return DTOs.([]DTO.AuthAuditDTO), nil
+	}
+
+	return nil, args.Error(1)
+}
+
 func (_m *MockAuthService) Register(dto DTO.RegisterUserDTO) (*models.Session, error) {
 	args := _m.Called(dto)
 
@@ -21,6 +31,11 @@ func (_m *MockAuthService) Register(dto DTO.RegisterUserDTO) (*models.Session, e
 }
 
 func (_m *MockAuthService) Login(dto DTO.LoginUserDTO) (*models.Session, error) {
-	//TODO implement me
-	panic("implement me")
+	args := _m.Called(dto)
+
+	if s := args.Get(0); s != nil {
+		return s.(*models.Session), nil
+	}
+
+	return nil, args.Error(1)
 }

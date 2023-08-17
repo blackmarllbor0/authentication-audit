@@ -14,7 +14,7 @@ type (
 	}
 
 	AuthAuditDTO struct {
-		Timestamp time.Time
-		Event     string
+		Timestamp time.Time `json:"timestamp"`
+		Event     string    `json:"event"`
 	}
 )

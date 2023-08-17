@@ -109,6 +109,10 @@ func (s AuthService) Login(dto DTO.LoginUserDTO) (*models.Session, error) {
 }
 
 func (s AuthService) GetAuthAuditByToken(token string) ([]DTO.AuthAuditDTO, error) {
+	if token == "" {
+		return nil, errors.TokenIsEmpty
+	}
+
 	session, err := s.sessionService.GetByToken(token)
 	if err != nil {
 		return nil, err
